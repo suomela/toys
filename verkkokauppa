@@ -1,0 +1,43 @@
+#!/usr/bin/python
+
+from fractions import Fraction
+
+DICE = 6
+
+def setup():
+    # http://jussip.sarjakuvablogit.com/2012/02/04/nakemykseni-verkkokauppa-comin-uudesta-sijainnista/
+    N = [None]
+    G = [event("goal")]
+    L = [event("lost")]
+    D = [event("die")]
+    return 4*N+L+5*N+D+4*N+D+7*N+D+5*N+D+9*N+D+4*N+D+5*N+L+5*N+D+G
+
+events = []
+def event(name):
+    events.append(name)
+    return len(events)-1
+
+positions = setup()
+assert positions[-1] is not None
+
+c = len(events)
+n = len(positions)
+
+# p[i][k] = probability of event k, starting from position i
+p = [ None for i in range(n) ]
+
+for i in range(n-1, -1, -1):
+    p[i] = [ Fraction(0) for k in range(c) ]
+    if positions[i] is None:
+        d = min(n-i-1, DICE)
+        for j in range(1,d+1):
+            for k in range(c):
+                p[i][k] += p[i+j][k] / d
+    else:
+        p[i][positions[i]] = Fraction(1)
+    
+    print "%2d:" % i,
+    for k, event in enumerate(events):
+        print "%6.2f%% %s" % (100 * p[i][k], event),
+    print
+
